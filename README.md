@@ -1,8 +1,8 @@
 # stowed
 
-A simple, zero-dependencies symlink manager for your dotfiles.
+A simple symlink manager for your dotfiles. Similar to GNU Stow, but simpler.
 
-> I only started this project because there was no easy way of installing GNU Stow with traditional cross-platform package managers such as [Mise-en-Place](https://mise.jdx.dev/) (which uses [Aqua](https://aquaproj.github.io/))
+> I started this project because there was no easy way of installing GNU Stow with cross-platform package managers like [Mise-en-Place](https://mise.jdx.dev/).
 
 ## Installation
 
@@ -10,7 +10,7 @@ A simple, zero-dependencies symlink manager for your dotfiles.
 bun install -g stowed@latest
 ```
 
-or
+or run directly:
 
 ```bash
 bunx stowed@latest
@@ -19,40 +19,76 @@ bunx stowed@latest
 ## Usage
 
 ```bash
-stowed [options] <paths...>
+stowed [options] <packages...>
 ```
 
-The tool expects paths in the format `package/path/to/file`. It strips the first directory (the "package" name) and creates a symlink at the target location.
-
-For example, `stowed nvim/.config/nvim` creates a symlink at `~/.config/nvim` pointing to `nvim/.config/nvim` in your current directory.
+Run from your dotfiles directory. Each package is a subdirectory containing files/folders to symlink to your home directory.
 
 ### Options
 
 | Flag | Description |
 |------|-------------|
 | `-t, --target <dir>` | Target directory (defaults to home) |
-| `-d, --dryRun` | Preview changes without applying them |
+| `-d, --dryRun` | Preview changes without applying |
 | `--silent` | Suppress "nothing to do" messages |
-| `--unlink` | Remove symlinks instead of creating them |
+| `--unlink` | Remove symlinks instead of creating |
 | `-h, --help` | Show help |
 
 ### Examples
 
 ```bash
-# Link your nvim and lazygit configs
-stowed nvim/.config/nvim lazygit/.config/lazygit
+# Stow multiple packages
+stowed nvim ghostty zsh
 
 # Preview what would happen
-stowed -d nvim/.config/nvim
+stowed -d nvim ghostty
 
-# Link to a custom directory
-stowed -t /custom/dir nvim/.config/nvim
+# Stow to a custom directory
+stowed -t /custom/dir nvim
 
-# Remove existing symlinks
-stowed --unlink nvim/.config/nvim
+# Remove symlinks
+stowed --unlink nvim ghostty
 ```
 
-## Similar tools
+## Directory Convention
+
+stowed uses a simple convention to determine what to symlink. It traverses each package directory and:
+
+1. **Files** are symlinked directly
+2. **Directories matching the package name** are symlinked entirely
+3. **Directories containing files** are symlinked entirely
+4. **Directories containing only subdirectories** are traversed deeper
+
+### Example Structure
+
+```
+dotfiles/
+├── nvim/
+│   └── .config/
+│       └── nvim/           # Symlinked: ~/.config/nvim -> dotfiles/nvim/.config/nvim
+│           ├── init.lua
+│           └── lua/
+├── git/
+│   └── .gitconfig          # Symlinked: ~/.gitconfig -> dotfiles/git/.gitconfig
+├── zsh/
+│   └── .zshrc              # Symlinked: ~/.zshrc -> dotfiles/zsh/.zshrc
+└── ghostty/
+    └── .config/
+        └── ghostty/        # Symlinked: ~/.config/ghostty -> dotfiles/ghostty/.config/ghostty
+            └── config
+```
+
+Running `stowed nvim git zsh ghostty` from the `dotfiles/` directory creates:
+
+| Source | Target |
+|--------|--------|
+| `nvim/.config/nvim` | `~/.config/nvim` |
+| `git/.gitconfig` | `~/.gitconfig` |
+| `zsh/.zshrc` | `~/.zshrc` |
+| `ghostty/.config/ghostty` | `~/.config/ghostty` |
+
+## Similar Tools
+
 - [GNU Stow](https://www.gnu.org/software/stow/)
 
 ## License

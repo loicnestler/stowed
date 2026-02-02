@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 import { exists } from 'node:fs/promises'
-import { join } from 'node:path'
 import { args } from './args'
-import { AutoLink } from './auto-link'
-import { COLORS } from './utils'
+import type { AutoLink } from './auto-link'
 import { AutoLinkResult } from './enums'
+import { Package } from './package'
+import { COLORS } from './utils'
 
 export interface StowedOptions {
   dryRun?: boolean
@@ -12,27 +12,35 @@ export interface StowedOptions {
   unlink?: boolean
 }
 
-const HELP_TEXT = `Usage: stowed [options] <paths...>
+const HELP_TEXT = `Usage: stowed [options] <packages...>
 
-Create or remove symlinks for specified paths in a target directory.
+Create or remove symlinks for packages in a target directory.
+Similar to GNU Stow, but simpler.
 
 Examples:
-  ${COLORS.Italic}Create symlinks in the home directory${COLORS.Reset}
-  ${COLORS.Gray}$ stowed nvim/.config/nvim lazygit/.config/lazygit${COLORS.Reset}
+  ${COLORS.Italic}Stow packages to home directory${COLORS.Reset}
+  ${COLORS.Gray}$ stowed nvim ghostty zsh${COLORS.Reset}
 
-  ${COLORS.Italic}Dry-run creating symlinks without making changes${COLORS.Reset}
-  ${COLORS.Gray}$ stowed -d nvim/.config/nvim${COLORS.Reset}
+  ${COLORS.Italic}Preview changes without applying${COLORS.Reset}
+  ${COLORS.Gray}$ stowed -d nvim ghostty${COLORS.Reset}
 
-  ${COLORS.Italic}Create symlinks in a custom target directory${COLORS.Reset}
-  ${COLORS.Gray}$ stowed -t /custom/dir nvim/.config/nvim${COLORS.Reset}
+  ${COLORS.Italic}Stow to a custom target directory${COLORS.Reset}
+  ${COLORS.Gray}$ stowed -t /custom/dir nvim${COLORS.Reset}
 
+  ${COLORS.Italic}Remove symlinks${COLORS.Reset}
+  ${COLORS.Gray}$ stowed --unlink nvim ghostty${COLORS.Reset}
 
 Options:
-  --target, -t <dir>    Target directory where links will be created (defaults to os.homedir())
-  --dryRun, -d          Simulate the linking process without making changes
-  --silent              Suppress output messages
-  --unlink              Remove existing links instead of creating them
+  -t, --target <dir>    Target directory (defaults to home directory)
+  -d, --dryRun          Preview changes without applying
+  --silent              Suppress "nothing to do" messages
+  --unlink              Remove symlinks instead of creating them
   -h, --help            Show this help message
+
+Directory Convention:
+  Packages should follow this structure:
+    <package>/.config/<package>/   -> ~/.config/<package>
+    <package>/.<dotfile>           -> ~/.<dotfile>
 `
 
 async function main() {
@@ -42,28 +50,28 @@ async function main() {
   }
 
   const opts: StowedOptions = args.values
-
   const rootDir = process.cwd()
-
   const targetDir = args.values.target
 
-  for (const path of args.positionals) {
-    if (!(await exists(path))) {
-      console.error(`${COLORS.Red}Path does not exist: ${path}`)
+  // Validate packages exist
+  const packages: Package[] = []
+  for (const input of args.positionals) {
+    const pkg = new Package(input, rootDir)
+    if (!(await exists(pkg.path))) {
+      console.error(
+        `${COLORS.Red}Package does not exist: ${pkg.name}${COLORS.Reset}`
+      )
       process.exit(1)
     }
+    packages.push(pkg)
   }
 
-  const links = args.positionals.map(positional => {
-    const realPath = join(rootDir, positional)
-
-    const [_pkg, ...rest] = positional.split('/').filter(Boolean)
-    const relativePath = rest.join('/')
-
-    const linkPath = join(targetDir, relativePath)
-
-    return new AutoLink(realPath, linkPath, opts)
-  })
+  // Discover all links from packages
+  const links: AutoLink[] = []
+  for (const pkg of packages) {
+    const pkgLinks = await pkg.discoverLinks(targetDir, opts)
+    links.push(...pkgLinks)
+  }
 
   const result: { success: AutoLink[]; error: AutoLink[] } = {
     success: [],
@@ -73,7 +81,7 @@ async function main() {
   for (const link of links) {
     try {
       await link.apply()
-      if(link.result === AutoLinkResult.Failed) {
+      if (link.result === AutoLinkResult.Failed) {
         result.error.push(link)
         continue
       }
