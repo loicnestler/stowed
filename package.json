@@ -1,6 +1,6 @@
 {
 	"name": "stowed",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"type": "module",
 	"bin": {
 		"stowed": "./src/main.ts"
@@ -16,9 +16,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.13",
-		"@types/bun": "latest"
-	},
-	"peerDependencies": {
+		"@types/bun": "latest",
 		"typescript": "^5"
 	}
 }
