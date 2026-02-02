@@ -1,6 +1,6 @@
 {
 	"name": "stowed",
-  "version": "0.1.0",
+	"version": "0.1.0",
 	"type": "module",
 	"bin": {
 		"stowed": "./src/main.ts"
@@ -10,7 +10,9 @@
 		"biome:fix": "biome format --write",
 		"format": "bun run biome:fix",
 		"typecheck": "tsc --noEmit",
-		"start": "bun run src/main.ts"
+		"start": "bun run src/main.ts",
+		"test": "bun test",
+		"test:coverage": "bun test --coverage"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.13",
