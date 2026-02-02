@@ -5,6 +5,7 @@ interface VirtualFile {
   target?: string // for symlinks
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Required for generic mock function type
 type MockFn<T extends (...args: any[]) => any> = ReturnType<typeof mock<T>>
 
 export interface MockFs {

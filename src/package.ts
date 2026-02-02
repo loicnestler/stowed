@@ -15,10 +15,7 @@ export class Package {
   readonly name: string
   readonly path: string
 
-  constructor(
-    input: string,
-    private readonly rootDir: string
-  ) {
+  constructor(input: string, rootDir: string) {
     // Normalize: strip ./ prefix and trailing /
     const normalized = input.replace(/^\.\//, '').replace(/\/$/, '')
 

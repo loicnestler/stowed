@@ -90,8 +90,8 @@ describe('Package', () => {
       const links = await pkg.discoverLinks('/home/user')
 
       expect(links).toHaveLength(1)
-      expect(links[0]!.linkPath).toBe('/home/user/.config/nvim')
-      expect(links[0]!.realPath).toBe('/root/nvim/.config/nvim')
+      expect(links[0]?.linkPath).toBe('/home/user/.config/nvim')
+      expect(links[0]?.realPath).toBe('/root/nvim/.config/nvim')
     })
 
     test('discovers root-level dotfiles', async () => {
@@ -106,8 +106,8 @@ describe('Package', () => {
       const links = await pkg.discoverLinks('/home/user')
 
       expect(links).toHaveLength(1)
-      expect(links[0]!.linkPath).toBe('/home/user/.zshrc')
-      expect(links[0]!.realPath).toBe('/root/zsh/.zshrc')
+      expect(links[0]?.linkPath).toBe('/home/user/.zshrc')
+      expect(links[0]?.realPath).toBe('/root/zsh/.zshrc')
     })
 
     test('discovers multiple dotfiles in same package', async () => {
@@ -144,8 +144,8 @@ describe('Package', () => {
 
       // Should symlink the entire ghostty directory, not individual files
       expect(links).toHaveLength(1)
-      expect(links[0]!.linkPath).toBe('/home/user/.config/ghostty')
-      expect(links[0]!.realPath).toBe('/root/ghostty/.config/ghostty')
+      expect(links[0]?.linkPath).toBe('/home/user/.config/ghostty')
+      expect(links[0]?.realPath).toBe('/root/ghostty/.config/ghostty')
     })
 
     test('handles mixed files and directories', async () => {
@@ -186,7 +186,7 @@ describe('Package', () => {
       const links = await pkg.discoverLinks('/home/user')
 
       expect(links).toHaveLength(1)
-      expect(links[0]!.linkPath).toBe('/home/user/.config/someapp')
+      expect(links[0]?.linkPath).toBe('/home/user/.config/someapp')
     })
   })
 })

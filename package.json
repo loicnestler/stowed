@@ -6,9 +6,8 @@
 		"stowed": "./src/main.ts"
 	},
 	"scripts": {
-		"biome:check": "biome check",
-		"biome:fix": "biome format --write",
-		"format": "bun run biome:fix",
+		"format": "biome format --write",
+		"lint": "biome lint",
 		"typecheck": "tsc --noEmit",
 		"start": "bun run src/main.ts",
 		"test": "bun test",
