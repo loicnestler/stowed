@@ -1,0 +1,18 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded",
+			"jsxQuoteStyle": "double",
+			"trailingCommas": "es5",
+			"arrowParentheses": "asNeeded",
+			"bracketSameLine": false,
+			"bracketSpacing": true,
+			"expand": "auto",
+			"indentStyle": "space",
+			"quoteProperties": "preserve",
+			"enabled": true
+		}
+	}
+}
